@@ -35,10 +35,10 @@ jobs:
                 
     - name: Compile
       run: |
-        sudo xcode-select -s /Applications/Xcode_11.7.app
+        sudo xcode-select -s /Applications/Xcode_12.5.1.app
         xcodebuild archive \
           -workspace PopcornTime.xcworkspace \
-          -scheme PopcornTimeiOS
+          -scheme PopcornTimeiOS \
           -configuration Release \
           CODE_SIGN_IDENTITY= \
           CODE_SIGNING_REQUIRED=NO \
