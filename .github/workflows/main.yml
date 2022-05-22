@@ -2,9 +2,9 @@ name: CI
 
 on: [push]
 
-jobs:  
-  build-ios:
-    name: iOS
+jobs:
+  build:
+    name: Build
 
     runs-on: macOS-latest
 
@@ -15,49 +15,49 @@ jobs:
       uses: actions/cache@v3.0.0
       id: cache
       with:
-        # FIXME.  Podfile.lock needs to be cached, because a specs repo is altered after install.
         path: |
           Pods
           PopcornTime.xcworkspace
           Podfile.lock
-        key: ${{ hashFiles('Podfile.lock') }}_v6
+        key: ${{ runner.os }}_${{ hashFiles('Podfile.lock') }}
 
-    - name: Get pods
+    - name: Get dependencies       
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
-        #gem install cocoapods
-        #pod repo update
-        #pod update
         gem install bundler
         bundle install
         bundle exec pod repo update
         bundle exec pod install
-                
+        
     - name: Compile
       run: |
         sudo xcode-select -s /Applications/Xcode_12.5.1.app
         xcodebuild archive \
           -workspace PopcornTime.xcworkspace \
-          -scheme PopcornTimeiOS \
+          -scheme PopcornTimetvOS \
           -configuration Release \
           CODE_SIGN_IDENTITY= \
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
+          EXPANDED_CODE_SIGN_IDENTITY= \
+          EXPANDED_CODE_SIGN_IDENTITY_NAME= \
+          EXPANDED_PROVISIONING_PROFILE= \
           VALID_ARCHS=arm64
         
     - name: Package
       run: |
+        cd ~
         mkdir Payload
-        cp -r ~/Library/Developer/Xcode/Archives/*/*/Products/Applications/PopcornTime.app Payload
-        wget https://github.com/sbingner/ldid/releases/download/v2.1.4+16.g5b8581c/ldid-osx.gz
-        gunzip ldid-osx.gz
-        chmod +x ldid-osx
-        ./ldid-osx -S Payload/PopcornTime.app/PopcornTime
-        zip -r popcorn_time_ios.ipa Payload
-
+        cp -r Library/Developer/Xcode/Archives/*/*/Products/Applications/PopcornTime.app Payload
+        wget https://github.com/sbingner/ldid/releases/download/v2.1.4/osx-ldid.tgz
+        tar -xvf osx-ldid.tgz
+        ./ldid -S Payload/PopcornTime.app/PopcornTime
+        zip -r popcorn_time.ipa Payload
+        rm -r Payload
+        
     - name: Upload
       uses: actions/upload-artifact@v3.0.0
       with:
-        name: 'popcorn_time_ios'
+        name: 'popcorn_time'
         path: |
-          popcorn_time_ios.ipa
+          ~/popcorn_time.ipa
