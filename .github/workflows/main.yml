@@ -34,7 +34,7 @@ jobs:
         sudo xcode-select -s /Applications/Xcode_12.5.1.app
         xcodebuild archive \
           -workspace PopcornTime.xcworkspace \
-          -scheme PopcornTimetvOS \
+          -scheme PopcornTimeiOS \
           -configuration Release \
           CODE_SIGN_IDENTITY= \
           CODE_SIGNING_REQUIRED=NO \
